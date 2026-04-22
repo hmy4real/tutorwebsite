@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Math Tutoring</title>
+  <title>Steve Math Tutoring</title>
   <link rel="icon" href="https://i.postimg.cc/N0rZb872/image.png" type="image/png">
   <style>
     :root {
@@ -35,6 +35,25 @@
       min-height: 100vh;
       margin: 0 auto;
       padding: 40px 0 28px;
+      position: relative;
+    }
+
+    .lang-toggle {
+      position: absolute;
+      top: 20px;
+      right: 0;
+      background: var(--card);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: background 0.2s;
+    }
+
+    .lang-toggle:hover {
+      background: rgba(255, 255, 255, 0.9);
     }
 
     .hero {
@@ -106,6 +125,7 @@
 </head>
 <body>
   <div class="page">
+    <button class="lang-toggle" id="lang-toggle">中文</button>
     <section class="hero">
       <h1 class="hero-title">Semiahmoo's Best Tutor</h1>
       <div class="hero-subtitle">Your future self will thank you now.</div>
@@ -123,5 +143,36 @@
     src="https://assets.calendly.com/assets/external/widget.js"
     async
   ></script>
+  <script>
+    const toggleButton = document.getElementById('lang-toggle');
+    const title = document.querySelector('.hero-title');
+    const subtitle = document.querySelector('.hero-subtitle');
+
+    let isEnglish = true;
+
+    const texts = {
+      en: {
+        title: "Semiahmoo's Best Tutor",
+        subtitle: "Your future self will thank you now.",
+        pageTitle: "Steve Math Tutoring",
+        button: "中文"
+      },
+      zh: {
+        title: "Semiahmoo最强一对一辅导",
+        subtitle: "未来的你会感谢现在的自己",
+        pageTitle: "韩某数学辅导",
+        button: "English"
+      }
+    };
+
+    toggleButton.addEventListener('click', () => {
+      isEnglish = !isEnglish;
+      const lang = isEnglish ? 'en' : 'zh';
+      title.textContent = texts[lang].title;
+      subtitle.textContent = texts[lang].subtitle;
+      document.title = texts[lang].pageTitle;
+      toggleButton.textContent = texts[lang].button;
+    });
+  </script>
 </body>
 </html>

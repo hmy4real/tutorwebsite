@@ -12,7 +12,7 @@ const attachmentTray = document.getElementById("attachmentTray");
 const submitButton = document.getElementById("chatSubmit") || chatForm.querySelector("button[type='submit']");
 
 const CHAT_HISTORY_KEY = "stevegptChatHistory";
-const REQUEST_TIMEOUT_MS = 70 * 1000;
+const REQUEST_TIMEOUT_MS = 190 * 1000;
 const MAX_ATTACHMENTS = 4;
 const MAX_FILE_BYTES = 16 * 1024 * 1024;
 const MAX_TEXT_ATTACHMENT_CHARS = 12000;
@@ -472,6 +472,7 @@ function updateBotMessage(message, text, options = {}) {
 
   bubble.replaceChildren(formatBotReply(text));
   message.dataset.reply = text;
+  renderReplySources(message);
 
   if (options.sourcePrompt) {
     message.dataset.sourcePrompt = options.sourcePrompt;
@@ -483,6 +484,42 @@ function updateBotMessage(message, text, options = {}) {
 
   scrollChatToBottom();
   updateEmptyState();
+}
+
+function renderReplySources(message, metadata) {
+  if (metadata) {
+    if (metadata.sources) message.dataset.sources = JSON.stringify(metadata.sources);
+    if (metadata.status !== undefined) message.dataset.toolStatus = metadata.status;
+  }
+  message.querySelector(".chat-sources")?.remove();
+  const sources = JSON.parse(message.dataset.sources || "[]");
+  const status = message.dataset.toolStatus || "";
+  if (!sources.length && !status) return;
+  const section = document.createElement("div");
+  section.className = "chat-sources";
+  section.setAttribute("aria-label", "Sources");
+  const heading = document.createElement("div");
+  heading.className = "chat-source-status";
+  heading.setAttribute("role", "status");
+  heading.textContent = status ? `${status}…` : "Sources";
+  section.appendChild(heading);
+  const list = document.createElement("div");
+  list.className = "chat-source-links";
+  for (const source of sources) {
+    try {
+      const url = new URL(source.url);
+      if (!["https:", "http:"].includes(url.protocol)) continue;
+      const link = document.createElement("a");
+      link.href = url.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = source.title || url.hostname;
+      link.title = url.href;
+      list.appendChild(link);
+    } catch {}
+  }
+  section.appendChild(list);
+  message.querySelector(".chat-bubble")?.appendChild(section);
 }
 
 function addReplyActions(message) {
@@ -783,7 +820,7 @@ async function copyText(text) {
   textarea.remove();
 }
 
-async function getBotReply(message, onChunk = () => {}, attachments = []) {
+async function getBotReply(message, onChunk = () => {}, attachments = [], onMetadata = () => {}) {
   if (!CHAT_API_ENDPOINT) {
     const localReply = getLocalReply(message);
     onChunk(localReply);
@@ -807,15 +844,17 @@ async function getBotReply(message, onChunk = () => {}, attachments = []) {
     });
 
     if (!response.ok) {
-      throw new Error("Chat request failed.");
+      const failure = await response.json().catch(() => ({}));
+      throw new Error(failure.error || `Chat request failed (${response.status}).`);
     }
 
     if (response.body && response.headers.get("content-type")?.includes("text/event-stream")) {
-      return await readReplyStream(response, onChunk);
+      return await readReplyStream(response, onChunk, onMetadata);
     }
 
     const data = await response.json();
-    const reply = data.reply || getLocalReply(message);
+    const reply = data.reply;
+    if (!reply) throw new Error(data.error || "The AI returned no answer.");
     onChunk(reply);
     return {
       reply
@@ -825,7 +864,7 @@ async function getBotReply(message, onChunk = () => {}, attachments = []) {
   }
 }
 
-async function readReplyStream(response, onChunk = () => {}) {
+async function readReplyStream(response, onChunk = () => {}, onMetadata = () => {}) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -836,8 +875,10 @@ async function readReplyStream(response, onChunk = () => {}) {
       return;
     }
 
-    try {
-      const data = JSON.parse(payload);
+    let data;
+    try { data = JSON.parse(payload); } catch { return; }
+    if (data.error) throw new Error(data.error);
+    if (data.sources || data.status !== undefined) onMetadata(data);
 
       const chunk = data.delta || data.reply || "";
 
@@ -845,10 +886,6 @@ async function readReplyStream(response, onChunk = () => {}) {
         fullReply += chunk;
         onChunk(fullReply);
       }
-    } catch {
-      fullReply += payload;
-      onChunk(fullReply);
-    }
   }
 
   while (true) {
@@ -915,6 +952,8 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
   messageElement.classList.add("streaming");
 
   if (replaceExisting) {
+    delete messageElement.dataset.sources;
+    delete messageElement.dataset.toolStatus;
     updateBotMessage(messageElement, "");
   }
 
@@ -923,13 +962,16 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
       if (requestId === activeRequestId) {
         updateBotMessage(messageElement, partialReply, { sourcePrompt: prompt });
       }
-    }, attachments);
+    }, attachments, (metadata) => {
+      if (requestId === activeRequestId) renderReplySources(messageElement, metadata);
+    });
 
     if (requestId !== activeRequestId) {
       return;
     }
 
-    const finalReply = reply || getLocalReply(prompt);
+    if (!reply) throw new Error("The AI returned no answer.");
+    const finalReply = reply;
 
     updateBotMessage(messageElement, finalReply, {
       sourcePrompt: prompt,
@@ -938,6 +980,11 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
     replaceExisting
       ? replaceConversationReply(prompt, finalReply)
       : appendConversation("assistant", finalReply, prompt);
+    const savedReply = [...conversation].reverse().find(item => item.role === "assistant" && item.sourcePrompt === prompt);
+    if (savedReply?.role === "assistant") {
+      savedReply.sources = JSON.parse(messageElement.dataset.sources || "[]");
+      saveConversationHistory();
+    }
   } catch (error) {
     if (error.name === "AbortError") {
       const hasReplyText = Boolean((messageElement.dataset.reply || messageElement.textContent || "").trim());
@@ -950,7 +997,8 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
       return;
     }
 
-    const localReply = getLocalReply(prompt);
+    const localReply = `Sorry, ${String(error.message || "the AI request failed. Please try again.").slice(0, 240)}`;
+    messageElement.dataset.toolStatus = "";
     updateBotMessage(messageElement, localReply, {
       sourcePrompt: prompt,
       actions: true
@@ -963,6 +1011,8 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
       activeRequestController = null;
       activeReplyMessage = null;
       messageElement.classList.remove("streaming");
+      messageElement.dataset.toolStatus = "";
+      renderReplySources(messageElement);
 
       chatInput.disabled = false;
       if (chatAttach) {
@@ -998,6 +1048,7 @@ function loadConversationHistory() {
       const message = addMessage(String(item.content), role === "user" ? "user" : "bot");
 
       if (role === "assistant") {
+        message.dataset.sources = JSON.stringify(Array.isArray(item.sources) ? item.sources : []);
         updateBotMessage(message, String(item.content), {
           sourcePrompt: item.sourcePrompt || "",
           actions: Boolean(item.sourcePrompt)
@@ -1007,6 +1058,7 @@ function loadConversationHistory() {
       conversation.push({
         role,
         content: String(item.content),
+        ...(Array.isArray(item.sources) ? { sources: item.sources } : {}),
         ...(item.sourcePrompt ? { sourcePrompt: String(item.sourcePrompt) } : {})
       });
     });

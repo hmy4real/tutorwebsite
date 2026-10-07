@@ -447,6 +447,11 @@ body::after {
   font-weight: 700;
 }
 
+.chat-sources { margin-top: 16px; font-size: 13px; color: #666a70; }
+.chat-source-status { margin-bottom: 6px; }
+.chat-source-links { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.chat-source-links a { color: inherit; max-width: 100%; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
+
 .chat-rendered code {
   padding: 0.1em 0.32em;
   border-radius: 7px;

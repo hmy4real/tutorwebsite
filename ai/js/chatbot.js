@@ -470,6 +470,8 @@ function updateBotMessage(message, text, options = {}) {
     return;
   }
 
+  const previousDisclosure = message.querySelector(".chat-sources details");
+  if (previousDisclosure) message.dataset.sourcesOpen = String(previousDisclosure.open);
   bubble.replaceChildren(formatBotReply(text));
   message.dataset.reply = text;
   renderReplySources(message);
@@ -491,6 +493,8 @@ function renderReplySources(message, metadata) {
     if (metadata.sources) message.dataset.sources = JSON.stringify(metadata.sources);
     if (metadata.status !== undefined) message.dataset.toolStatus = metadata.status;
   }
+  const previousDisclosure = message.querySelector(".chat-sources details");
+  if (previousDisclosure) message.dataset.sourcesOpen = String(previousDisclosure.open);
   message.querySelector(".chat-sources")?.remove();
   const sources = JSON.parse(message.dataset.sources || "[]");
   const status = message.dataset.toolStatus || "";

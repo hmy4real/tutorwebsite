@@ -451,6 +451,8 @@ body::after {
 .chat-source-status { margin-bottom: 6px; }
 .chat-source-links { display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .chat-source-links a { color: inherit; max-width: 100%; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
+.chat-sources summary { cursor: pointer; width: fit-content; padding: 3px 0; }
+.chat-sources details[open] .chat-source-links { margin-top: 8px; }
 
 .chat-rendered code {
   padding: 0.1em 0.32em;

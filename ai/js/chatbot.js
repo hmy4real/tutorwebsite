@@ -498,11 +498,13 @@ function renderReplySources(message, metadata) {
   const section = document.createElement("div");
   section.className = "chat-sources";
   section.setAttribute("aria-label", "Sources");
-  const heading = document.createElement("div");
-  heading.className = "chat-source-status";
-  heading.setAttribute("role", "status");
-  heading.textContent = status ? `${status}…` : "Sources";
-  section.appendChild(heading);
+  if (status) {
+    const heading = document.createElement("div");
+    heading.className = "chat-source-status";
+    heading.setAttribute("role", "status");
+    heading.textContent = `${status}…`;
+    section.appendChild(heading);
+  }
   const list = document.createElement("div");
   list.className = "chat-source-links";
   for (const source of sources) {
@@ -518,7 +520,17 @@ function renderReplySources(message, metadata) {
       list.appendChild(link);
     } catch {}
   }
-  section.appendChild(list);
+  if (list.childElementCount) {
+    const details = document.createElement("details");
+    details.open = message.dataset.sourcesOpen === "true";
+    const summary = document.createElement("summary");
+    summary.textContent = `${list.childElementCount} ${list.childElementCount === 1 ? "source" : "sources"}`;
+    details.append(summary, list);
+    details.addEventListener("toggle", () => {
+      if (details.isConnected) message.dataset.sourcesOpen = String(details.open);
+    });
+    section.appendChild(details);
+  }
   message.querySelector(".chat-bubble")?.appendChild(section);
 }
 

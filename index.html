@@ -1,178 +1,1133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Steve Math Tutoring</title>
-  <link rel="icon" href="https://i.postimg.cc/N0rZb872/image.png" type="image/png">
-  <style>
-    :root {
-      --bg-top: #f7f8fc;
-      --bg-bottom: #e9eef7;
-      --text: #111111;
-      --muted: #6e6e73;
-      --card: rgba(255, 255, 255, 0.72);
-      --border: rgba(255, 255, 255, 0.82);
-      --shadow: 0 24px 60px rgba(17, 17, 17, 0.08);
-      --hero-size: clamp(2.4rem, 5vw, 5.2rem);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-      color: var(--text);
-      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
-      overflow-x: hidden;
-    }
-
-    .page {
-      width: min(1200px, calc(100% - 32px));
-      min-height: 100vh;
-      margin: 0 auto;
-      padding: 40px 0 28px;
-      position: relative;
-    }
-
-    .lang-toggle {
-      position: absolute;
-      top: 20px;
-      right: 0;
-      background: var(--card);
-      border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      transition: background 0.2s;
-    }
-
-    .lang-toggle:hover {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    .hero {
-      text-align: center;
-      padding: 32px 0 72px;
-    }
-
-    .hero-title {
-      margin: 0;
-      font-size: 3rem;
-      line-height: 1.04;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-    }
-
-    .hero-subtitle {
-      margin-top: 10px;
-      font-size: 1.5rem;
-      font-weight: 400;
-      color: var(--muted);
-    }
-
-    .calendly-shell {
-      border-radius: 36px;
-      background: var(--card);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .calendly-inline-widget {
-      height: 640px;
-    }
-
-    @media (max-width: 900px) {
-      .page {
-        width: min(100% - 20px, 1200px);
-        min-height: 100vh;
-        padding: 24px 0 20px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0a0e15" />
+    <meta
+      name="description"
+      content="One-on-one math tutoring with Steve in Semiahmoo. Clear explanations, thoughtful practice, and confidence that lasts."
+    />
+    <title>Steve Tutoring — Make math click.</title>
+    <link
+      rel="icon"
+      href="https://i.postimg.cc/N0rZb872/image.png"
+      type="image/png"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0e15;
+        --text: #f1f3f8;
+        --muted: #a0aabd;
+        --line: #ffffff18;
       }
-
-      .hero {
-        padding: 18px 0 26px;
+      * {
+        box-sizing: border-box;
       }
-
-      .hero-title {
-        white-space: normal;
-        font-size: clamp(2.1rem, 9vw, 4rem);
-        line-height: 1.08;
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 110px;
       }
-
-      .hero-subtitle {
-        font-size: 1rem;
-        margin-top: 14px;
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
-
-      .calendly-shell {
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font: inherit;
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid #a5bcff;
+        outline-offset: 5px;
+      }
+      ::selection {
+        background: #536aa6;
+        color: white;
+      }
+      .skip {
+        position: fixed;
+        top: -100px;
+        left: 20px;
+        z-index: 100;
+        background: white;
+        color: #111;
+        padding: 12px;
+        border-radius: 10px;
+      }
+      .skip:focus {
+        top: 20px;
+      }
+      .ambient {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        border-radius: 14px;
+        height: 1100px;
+        pointer-events: none;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse at 50% 28%, #455a912c, transparent 55%),
+          radial-gradient(ellipse at 85% 45%, #42728118, transparent 40%);
       }
-
-      .calendly-inline-widget {
-        width: 100%;
+      .ambient:after {
+        content: "";
+        position: absolute;
+        width: 700px;
         height: 700px;
-        min-width: 0;
+        border: 1px solid #aabeff09;
+        border-radius: 50%;
+        left: calc(50% - 350px);
+        top: 70px;
+        box-shadow:
+          0 0 0 110px #aabeff04,
+          0 0 0 220px #aabeff03;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <button class="lang-toggle" id="lang-toggle">中文</button>
-    <section class="hero">
-      <h1 class="hero-title">Best Tutor in Semiahmoo</h1>
-      <div class="hero-subtitle">Your future self will thank you</div>
-    </section>
-
-    <section class="calendly-shell">
-      <div
-        class="calendly-inline-widget"
-        data-url="https://calendly.com/stevehan926/1hr?hide_gdpr_banner=1"
-      ></div>
-    </section>
-  </div>
-
-  <script
-    src="https://assets.calendly.com/assets/external/widget.js"
-    async
-  ></script>
-  <script>
-    const toggleButton = document.getElementById('lang-toggle');
-    const title = document.querySelector('.hero-title');
-    const subtitle = document.querySelector('.hero-subtitle');
-
-    let isEnglish = true;
-
-    const texts = {
-      en: {
-        title: "Best Tutor in Semiahmoo",
-        subtitle: "Your future self will thank you",
-        pageTitle: "Steve Math Tutoring",
-        button: "中文"
-      },
-      zh: {
-        title: "最强一对一数学辅导",
-        subtitle: "未来的你会感谢现在的自己",
-        pageTitle: "韩某一对一数学辅导",
-        button: "English"
+      .wrap {
+        width: min(1120px, calc(100% - 64px));
+        margin: auto;
       }
-    };
-
-    toggleButton.addEventListener('click', () => {
-      isEnglish = !isEnglish;
-      const lang = isEnglish ? 'en' : 'zh';
-      title.textContent = texts[lang].title;
-      subtitle.textContent = texts[lang].subtitle;
-      document.title = texts[lang].pageTitle;
-      toggleButton.textContent = texts[lang].button;
-    });
-  </script>
-</body>
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 30;
+        padding: 24px 0;
+        transition: padding 0.45s;
+      }
+      .nav {
+        width: min(1200px, calc(100% - 48px));
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 12px 22px;
+        border: 1px solid transparent;
+        border-radius: 20px;
+        transition:
+          background 0.45s,
+          border-color 0.45s,
+          box-shadow 0.45s,
+          border-radius 0.45s;
+      }
+      .header.scrolled {
+        padding: 12px 0;
+      }
+      .header.scrolled .nav {
+        background: #141923c7;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-color: var(--line);
+        box-shadow: 0 12px 40px #0004;
+        border-radius: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+        font-weight: 650;
+        letter-spacing: -0.7px;
+        white-space: nowrap;
+      }
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #8293ba55;
+        border-radius: 9px;
+        background: linear-gradient(145deg, #7189c733, #ffffff05);
+        font-size: 20px;
+        color: #c1d1ff;
+      }
+      .brand em {
+        font-style: normal;
+        font-weight: 400;
+        color: #a7b1c4;
+      }
+      .nav-links {
+        display: flex;
+        gap: 28px;
+        font-size: 13px;
+        color: #b1b9c8;
+      }
+      .nav-links a:hover {
+        color: white;
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .languages {
+        display: flex;
+        background: #ffffff06;
+        border: 1px solid var(--line);
+        padding: 3px;
+        border-radius: 30px;
+        gap: 2px;
+      }
+      .languages button {
+        border: 0;
+        border-radius: 20px;
+        padding: 6px 10px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .languages button[aria-pressed="true"] {
+        background: #ffffff16;
+        color: white;
+      }
+      .nav-book {
+        font-size: 12px;
+        border: 1px solid #ffffff22;
+        background: #ffffff08;
+        border-radius: 30px;
+        padding: 10px 16px;
+      }
+      .nav-book:hover {
+        background: #ffffff18;
+      }
+      main {
+        position: relative;
+      }
+      .hero {
+        padding: 186px 0 0;
+        text-align: center;
+      }
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        color: #a9b8d2;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 2.4px;
+        font-weight: 600;
+      }
+      .spark {
+        color: #a9c2ff;
+        font-size: 16px;
+      }
+      .hero h1 {
+        font-size: clamp(48px, 6.8vw, 84px);
+        font-weight: 500;
+        line-height: 1.06;
+        letter-spacing: -4.5px;
+        margin: 28px 0 24px;
+      }
+      .hero h1 span {
+        display: block;
+      }
+      .hero h1 span:last-child {
+        background: linear-gradient(100deg, #dce6ff 10%, #8f9db8 80%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      .hero-description {
+        max-width: 550px;
+        margin: auto;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.85;
+      }
+      .hero-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 26px;
+        margin-top: 34px;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        padding: 15px 24px;
+        border-radius: 30px;
+        background: #edf1fa;
+        color: #111722;
+        font-size: 14px;
+        font-weight: 550;
+        box-shadow: 0 0 32px #a5bcff13;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 35px #a5bcff30;
+      }
+      .text-link {
+        font-size: 13px;
+        color: #b0bbcf;
+        display: inline-flex;
+        gap: 9px;
+        align-items: center;
+      }
+      .text-link:hover {
+        color: white;
+      }
+      .hero-note {
+        color: #94a2ba;
+        font-size: 11px;
+        margin: 22px 0 52px;
+        letter-spacing: 0.5px;
+      }
+      .glass {
+        border: 1px solid var(--line);
+        background: linear-gradient(135deg, #ffffff0e, #ffffff04);
+        box-shadow: 0 24px 80px #0003;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+      .lesson {
+        max-width: 930px;
+        margin: auto;
+        border-radius: 20px;
+        text-align: left;
+        overflow: hidden;
+      }
+      .lesson-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 17px 24px;
+        border-bottom: 1px solid var(--line);
+        color: #93a0b7;
+        font-size: 11px;
+      }
+      .dots {
+        display: flex;
+        gap: 6px;
+      }
+      .dots i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #536079;
+      }
+      .dots i:first-child {
+        background: #829cd3;
+      }
+      .lesson-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 285px;
+      }
+      .lesson-copy {
+        padding: 38px 40px;
+      }
+      .mini-label {
+        font-size: 10px;
+        color: #9daccc;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .lesson-copy h2 {
+        font-size: 28px;
+        line-height: 1.3;
+        font-weight: 450;
+        letter-spacing: -0.8px;
+        margin: 14px 0;
+      }
+      .lesson-copy p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.8;
+        max-width: 295px;
+      }
+      .lesson-bottom {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 10px;
+        color: #abb8cf;
+        margin-top: 24px;
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        background: #9bc8b6;
+        border-radius: 50%;
+        box-shadow: 0 0 12px #9bc8b655;
+        flex-shrink: 0;
+      }
+      .graph {
+        position: relative;
+        margin: 22px 28px 22px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: radial-gradient(
+          ellipse at center,
+          #5c76b019,
+          transparent 70%
+        );
+      }
+      .graph svg {
+        width: 100%;
+        height: 100%;
+        min-height: 245px;
+        display: block;
+      }
+      .formula {
+        position: absolute;
+        right: 16px;
+        top: 14px;
+        background: #182131c9;
+        border: 1px solid #a9baff22;
+        border-radius: 8px;
+        padding: 9px 12px;
+        color: #b7c7e9;
+        font-family: Georgia, serif;
+        font-size: 15px;
+      }
+      .graph-caption {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        white-space: nowrap;
+        color: #94a3bb;
+        letter-spacing: 1px;
+      }
+      .section {
+        padding-top: 124px;
+      }
+      .section-intro {
+        max-width: 640px;
+        margin-bottom: 45px;
+      }
+      .section-tag {
+        color: #9aaaca;
+        font-size: 10px;
+        letter-spacing: 2.3px;
+        text-transform: uppercase;
+      }
+      .section h2 {
+        font-size: clamp(30px, 4vw, 46px);
+        font-weight: 450;
+        line-height: 1.15;
+        letter-spacing: -1.8px;
+        margin: 16px 0;
+      }
+      .section-intro p {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.8;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .card {
+        padding: 30px;
+        border-radius: 18px;
+        transition:
+          border-color 0.3s,
+          transform 0.3s;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: #a5bcff44;
+      }
+      .icon {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #93b2ff0c;
+        border: 1px solid #a5bcff22;
+        color: #b5caff;
+        font-size: 20px;
+      }
+      .card h3 {
+        font-size: 19px;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+        margin: 26px 0 12px;
+      }
+      .card p {
+        font-size: 13px;
+        line-height: 1.85;
+        color: var(--muted);
+        margin: 0;
+      }
+      .approach {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 80px;
+        align-items: start;
+      }
+      .approach .section-intro {
+        position: sticky;
+        top: 130px;
+      }
+      .steps {
+        border-top: 1px solid var(--line);
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 18px;
+        padding: 30px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .step-number {
+        font-size: 12px;
+        color: #94a3bf;
+        padding-top: 4px;
+      }
+      .step h3 {
+        font-size: 20px;
+        font-weight: 450;
+        letter-spacing: -0.5px;
+        margin: 0 0 12px;
+      }
+      .step p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.85;
+        margin: 0;
+      }
+      .closing {
+        margin-top: 124px;
+        text-align: center;
+        padding: 64px 24px;
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse at 50% 0%, #769ce21c, transparent 70%),
+          linear-gradient(135deg, #ffffff05, #ffffff02);
+      }
+      .closing h2 {
+        font-size: clamp(32px, 5vw, 52px);
+        margin: 18px 0;
+        letter-spacing: -2px;
+        font-weight: 450;
+      }
+      .closing p {
+        max-width: 470px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.8;
+        margin: 0 auto 28px;
+      }
+      .closing .small {
+        font-size: 11px;
+        color: #94a2ba;
+        margin: 18px 0 0;
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 38px 0;
+        font-size: 11px;
+        color: #94a2ba;
+        gap: 20px;
+      }
+      .footer a {
+        color: #a0aec5;
+      }
+      .reveal {
+        transition:
+          opacity 0.8s,
+          transform 0.8s;
+      }
+      .js .reveal:not(.visible) {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      @media (max-width: 800px) {
+        .nav-links {
+          display: none;
+        }
+        .nav {
+          width: calc(100% - 28px);
+          padding: 10px 14px;
+        }
+        .header {
+          padding: 14px 0;
+        }
+        .nav-actions {
+          gap: 10px;
+        }
+        .wrap {
+          width: calc(100% - 40px);
+        }
+        .hero {
+          padding-top: 155px;
+        }
+        .hero h1 {
+          letter-spacing: -2.5px;
+        }
+        .cards {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: 26px;
+        }
+        .card h3 {
+          margin-top: 20px;
+        }
+        .approach {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        .approach .section-intro {
+          position: static;
+          margin-bottom: 12px;
+        }
+        .section {
+          padding-top: 85px;
+        }
+        .closing {
+          margin-top: 85px;
+        }
+        .lesson-copy {
+          padding: 28px;
+        }
+        .graph {
+          margin-right: 14px;
+        }
+        .lesson-copy h2 {
+          font-size: 24px;
+        }
+        .lesson-copy p {
+          font-size: 12px;
+        }
+      }
+      @media (max-width: 500px) {
+        .brand {
+          font-size: 16px;
+          gap: 7px;
+        }
+        .brand-mark {
+          width: 26px;
+          height: 26px;
+        }
+        .nav-book {
+          display: none;
+        }
+        .hero {
+          padding-top: 140px;
+        }
+        .hero h1 {
+          font-size: 48px;
+          letter-spacing: -2.7px;
+        }
+        .hero-description {
+          font-size: 15px;
+        }
+        .hero-actions {
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        .hero-note {
+          font-size: 10px;
+          margin-bottom: 38px;
+        }
+        .lesson-body {
+          grid-template-columns: 1fr;
+        }
+        .lesson-copy {
+          padding: 26px 24px 6px;
+        }
+        .lesson-copy p {
+          max-width: none;
+        }
+        .lesson-bottom {
+          margin-top: 18px;
+        }
+        .graph {
+          height: 230px;
+          margin: 5px 18px 18px;
+        }
+        .graph svg {
+          min-height: 230px;
+        }
+        .lesson-top {
+          padding: 14px 20px;
+          font-size: 10px;
+        }
+        .section h2 {
+          letter-spacing: -1.2px;
+        }
+        .footer {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .closing {
+          padding: 48px 20px;
+        }
+        .closing h2 {
+          letter-spacing: -1.3px;
+        }
+        html[lang="zh-CN"] .hero h1 {
+          font-size: 43px;
+          letter-spacing: -1px;
+        }
+      }
+      @media (max-width: 500px) {
+        html[lang="zh-CN"] .hero h1 {
+          font-size: 34px;
+          line-height: 1.3;
+          letter-spacing: -1px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *:before,
+        *:after {
+          transition: none !important;
+          animation: none !important;
+        }
+        .js .reveal:not(.visible) {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+    <div class="ambient" aria-hidden="true"></div>
+    <header class="header" id="header">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="#" aria-label="Steve Tutoring home"
+          ><span class="brand-mark" aria-hidden="true">s</span
+          ><span>steve<em> tutoring</em></span></a
+        >
+        <div class="nav-links">
+          <a href="#why" data-i18n="navWhy">Why Steve</a
+          ><a href="#approach" data-i18n="navApproach">The approach</a>
+        </div>
+        <div class="nav-actions">
+          <div class="languages" role="group" aria-label="Language">
+            <button type="button" data-lang="en" aria-pressed="true" lang="en">
+              EN</button
+            ><button
+              type="button"
+              data-lang="zh"
+              aria-pressed="false"
+              lang="zh-CN"
+            >
+              中文
+            </button>
+          </div>
+          <a
+            class="nav-book"
+            href="https://calendly.com/stevehan926/1hr"
+            data-i18n="book"
+            >Book a session</a
+          >
+        </div>
+      </nav>
+    </header>
+    <main id="main" class="wrap">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="eyebrow">
+          <span class="spark" aria-hidden="true">✦</span
+          ><span data-i18n="eyebrow">One-on-one math tutoring · Semiahmoo</span>
+        </div>
+        <h1 id="hero-title">
+          <span data-i18n="hero1">Make math click.</span
+          ><span data-i18n="hero2">See what you can do.</span>
+        </h1>
+        <p class="hero-description" data-i18n="heroDescription">
+          The right explanation changes everything. Learn with Steve, turn
+          confusion into clarity, and walk into your next class with more
+          confidence.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="https://calendly.com/stevehan926/1hr"
+            ><span data-i18n="book">Book a session</span
+            ><span aria-hidden="true">↗</span></a
+          ><a class="text-link" href="#approach"
+            ><span data-i18n="how">See how it works</span
+            ><span aria-hidden="true">↓</span></a
+          >
+        </div>
+        <p class="hero-note" data-i18n="heroNote">
+          Your pace. Your questions. Your breakthrough.
+        </p>
+        <div class="lesson glass">
+          <div class="lesson-top">
+            <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span data-i18n="lessonTop">A little clarity goes a long way.</span
+            ><span aria-hidden="true">↗</span>
+          </div>
+          <div class="lesson-body">
+            <div class="lesson-copy">
+              <div class="mini-label" data-i18n="lessonLabel">
+                The “oh, I get it” moment
+              </div>
+              <h2 data-i18n="lessonTitle">
+                Less memorizing.<br />More understanding.
+              </h2>
+              <p data-i18n="lessonDescription">
+                Connect the equation to the idea behind it. When you understand
+                the why, the next problem feels a lot less unfamiliar.
+              </p>
+              <div class="lesson-bottom">
+                <span class="status-dot" aria-hidden="true"></span
+                ><span data-i18n="lessonStatus"
+                  >One concept. A whole new perspective.</span
+                >
+              </div>
+            </div>
+            <div class="graph">
+              <span class="formula" aria-hidden="true">y = x²</span
+              ><svg
+                viewBox="0 0 400 260"
+                role="img"
+                aria-labelledby="graph-title"
+              >
+                <title id="graph-title">Graph of y equals x squared</title>
+                <defs>
+                  <pattern
+                    id="grid"
+                    width="32"
+                    height="32"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M32 0H0V32"
+                      fill="none"
+                      stroke="#94acc8"
+                      stroke-opacity=".08"
+                    />
+                  </pattern>
+                  <linearGradient id="curve">
+                    <stop stop-color="#6e8ccd" />
+                    <stop offset=".5" stop-color="#c1d7ff" />
+                    <stop offset="1" stop-color="#6e8ccd" />
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="260" fill="url(#grid)" />
+                <path
+                  d="M28 205H375 M200 20V235"
+                  stroke="#849ac1"
+                  stroke-opacity=".25"
+                />
+                <path
+                  d="M70 35 Q200 375 330 35"
+                  fill="none"
+                  stroke="#8fb3ff"
+                  stroke-width="10"
+                  opacity=".05"
+                />
+                <path
+                  d="M70 35 Q200 375 330 35"
+                  fill="none"
+                  stroke="url(#curve)"
+                  stroke-width="2.5"
+                />
+                <circle cx="200" cy="205" r="5" fill="#d9e6ff" />
+                <circle
+                  cx="200"
+                  cy="205"
+                  r="12"
+                  fill="none"
+                  stroke="#b9d0ff"
+                  stroke-opacity=".2"
+                />
+                <text x="211" y="224" fill="#8c9fbd" font-size="10">
+                  (0, 0)
+                </text>
+                <text x="370" y="221" fill="#71829e" font-size="10">x</text>
+                <text x="210" y="28" fill="#71829e" font-size="10">y</text></svg
+              ><span class="graph-caption" data-i18n="graphCaption"
+                >A formula becomes a picture.</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section reveal" id="why" aria-labelledby="why-title">
+        <div class="section-intro">
+          <span class="section-tag" data-i18n="whyTag"
+            >A better way to learn</span
+          >
+          <h2 id="why-title" data-i18n="whyTitle">
+            Big ideas.<br />Broken down for you.
+          </h2>
+          <p data-i18n="whyDescription">
+            Math shouldn't feel like a language everyone else understands. Let's
+            find the explanation that makes sense to you.
+          </p>
+        </div>
+        <div class="cards">
+          <article class="card glass">
+            <div class="icon" aria-hidden="true">◎</div>
+            <h3 data-i18n="card1Title">The focus is you.</h3>
+            <p data-i18n="card1Description">
+              One-on-one time built around where you are, what you're working
+              on, and what you want to understand next.
+            </p>
+          </article>
+          <article class="card glass">
+            <div class="icon" aria-hidden="true">⌁</div>
+            <h3 data-i18n="card2Title">Make the pieces connect.</h3>
+            <p data-i18n="card2Description">
+              Clear, step-by-step explanations that link the method to the
+              meaning. Build a foundation you can actually use.
+            </p>
+          </article>
+          <article class="card glass">
+            <div class="icon" aria-hidden="true">↗</div>
+            <h3 data-i18n="card3Title">Bring on the next problem.</h3>
+            <p data-i18n="card3Description">
+              Work through questions, learn from mistakes, and practice thinking
+              for yourself. Confidence starts with knowing why.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section
+        class="section approach reveal"
+        id="approach"
+        aria-labelledby="approach-title"
+      >
+        <div class="section-intro">
+          <span class="section-tag" data-i18n="approachTag"
+            >From stuck to steady</span
+          >
+          <h2 id="approach-title" data-i18n="approachTitle">
+            Your next step<br />starts right here.
+          </h2>
+          <p data-i18n="approachDescription">
+            A difficult chapter. A test coming up. A question you've been afraid
+            to ask. Bring it with you — we'll start there.
+          </p>
+          <a class="text-link" href="https://calendly.com/stevehan926/1hr"
+            ><span data-i18n="findTime">Find a time that works</span
+            ><span aria-hidden="true">↗</span></a
+          >
+        </div>
+        <div class="steps">
+          <article class="step">
+            <span class="step-number">01</span>
+            <div>
+              <h3 data-i18n="step1Title">Bring what you're working on.</h3>
+              <p data-i18n="step1Description">
+                Your homework, class notes, or the topic that isn't clicking
+                yet. We start with your questions and find the gaps together.
+              </p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step-number">02</span>
+            <div>
+              <h3 data-i18n="step2Title">Understand it, step by step.</h3>
+              <p data-i18n="step2Description">
+                Slow down the tricky parts. Look at the idea from a different
+                angle. Ask “why?” as many times as you need.
+              </p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step-number">03</span>
+            <div>
+              <h3 data-i18n="step3Title">Put it into practice.</h3>
+              <p data-i18n="step3Description">
+                Try problems with support, then take the lead. Leave with a
+                clearer understanding and a direction for what to practice next.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section class="closing glass reveal" aria-labelledby="closing-title">
+        <span class="section-tag" data-i18n="closingTag"
+          >One session. A fresh start.</span
+        >
+        <h2 id="closing-title" data-i18n="closingTitle">
+          Your future self will thank you.
+        </h2>
+        <p data-i18n="closingDescription">
+          You don't have to figure it all out alone. Take the next step toward
+          feeling more capable, more prepared, and more like yourself in math.
+        </p>
+        <a class="button" href="https://calendly.com/stevehan926/1hr"
+          ><span data-i18n="book">Book a session</span
+          ><span aria-hidden="true">↗</span></a
+        >
+        <p class="small" data-i18n="bookingNote">
+          Choose your time on Calendly.
+        </p>
+      </section>
+    </main>
+    <footer class="footer wrap">
+      <span
+        >© <span id="year">2026</span> Steve Tutoring ·
+        <span data-i18n="footerLocation">Semiahmoo</span></span
+      ><a href="#" data-i18n="backTop">Back to top ↑</a>
+    </footer>
+    <script>
+      const chinese = {
+        skip: "跳至正文",
+        navWhy: "为什么选择 Steve",
+        navApproach: "辅导方式",
+        book: "预约辅导",
+        eyebrow: "一对一数学辅导 · Semiahmoo",
+        hero1: "让数学豁然开朗。",
+        hero2: "发现自己的潜力。",
+        heroDescription:
+          "一个恰到好处的解释，就能带来不一样的理解。和 Steve 一起，把困惑变成思路，带着更多自信走进下一堂课。",
+        how: "了解辅导方式",
+        heroNote: "你的节奏。你的问题。你的突破。",
+        lessonTop: "理解多一点，前进一大步。",
+        lessonLabel: "原来如此的那一刻",
+        lessonTitle: "少一点死记硬背。\n多一点真正理解。",
+        lessonDescription:
+          "把公式和背后的思路连起来。理解了为什么，下一道题就不再那么陌生。",
+        lessonStatus: "一个概念，打开新的视角。",
+        graphCaption: "让公式变成看得见的思路。",
+        whyTag: "找到适合你的学习方式",
+        whyTitle: "复杂的知识。\n清晰地讲给你。",
+        whyDescription:
+          "数学不该像一种只有别人能听懂的语言。一起找到那个让你真正明白的解释。",
+        card1Title: "把时间留给你。",
+        card1Description:
+          "一对一辅导，从你目前的进度出发，围绕正在学习的内容，以及你最想弄懂的问题展开。",
+        card2Title: "把知识串起来。",
+        card2Description:
+          "清晰、循序渐进的讲解，把解题方法和背后的原理联系起来，打好真正用得上的基础。",
+        card3Title: "更从容地面对下一题。",
+        card3Description:
+          "一起解题，从错误中找到思路，练习独立思考。知道为什么，自信才有根基。",
+        approachTag: "从卡住，到心中有数",
+        approachTitle: "你的下一步。\n从这里开始。",
+        approachDescription:
+          "难懂的章节、即将到来的考试，或一直不好意思问的问题。都带过来，我们从那里开始。",
+        findTime: "选择适合你的时间",
+        step1Title: "带上正在学习的内容。",
+        step1Description:
+          "作业、课堂笔记，或还没弄懂的知识点。从你的问题出发，一起找出需要补上的环节。",
+        step2Title: "一步一步，真正弄明白。",
+        step2Description:
+          "难的地方慢慢讲，换个角度看问题。想问多少次“为什么”，都没关系。",
+        step3Title: "把理解变成能力。",
+        step3Description:
+          "先一起练习，再由你独立尝试。带着更清晰的理解，以及接下来练习的方向，结束这次辅导。",
+        closingTag: "一次辅导，一个新起点",
+        closingTitle: "未来的你，会感谢现在的自己。",
+        closingDescription:
+          "你不必独自摸索。迈出下一步，让数学学习多一份把握、多一份准备，也多一份从容。",
+        bookingNote: "前往 Calendly 选择辅导时间。",
+        footerLocation: "Semiahmoo",
+        backTop: "返回顶部 ↑",
+      };
+      const nodes = [...document.querySelectorAll("[data-i18n]")];
+      const english = Object.fromEntries(
+        nodes.map((node) => [
+          node.dataset.i18n,
+          Array.from(node.childNodes)
+            .map((child) =>
+              child.nodeName === "BR" ? "\n" : child.textContent,
+            )
+            .join(""),
+        ]),
+      );
+      function setLanguage(language) {
+        const zh = language === "zh";
+        const words = zh ? chinese : english;
+        nodes.forEach((node) => {
+          const lines = words[node.dataset.i18n].split("\n");
+          node.replaceChildren();
+          lines.forEach((line, index) => {
+            if (index) node.append(document.createElement("br"));
+            node.append(document.createTextNode(line));
+          });
+        });
+        document.documentElement.lang = zh ? "zh-CN" : "en";
+        document.title = zh
+          ? "Steve 数学辅导 — 让数学豁然开朗。"
+          : "Steve Tutoring — Make math click.";
+        document.querySelector('meta[name="description"]').content = zh
+          ? "Semiahmoo 一对一数学辅导。和 Steve 一起，通过清晰讲解和循序渐进的练习，真正理解数学，建立自信。"
+          : "One-on-one math tutoring with Steve in Semiahmoo. Clear explanations, thoughtful practice, and confidence that lasts.";
+        document
+          .querySelector("nav")
+          .setAttribute("aria-label", zh ? "主导航" : "Main navigation");
+        document
+          .querySelector(".languages")
+          .setAttribute("aria-label", zh ? "语言" : "Language");
+        document
+          .querySelector(".brand")
+          .setAttribute(
+            "aria-label",
+            zh ? "Steve 数学辅导首页" : "Steve Tutoring home",
+          );
+        document.getElementById("graph-title").textContent = zh
+          ? "y 等于 x 平方的函数图像"
+          : "Graph of y equals x squared";
+        document
+          .querySelectorAll("[data-lang]")
+          .forEach((button) =>
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.lang === language),
+            ),
+          );
+      }
+      document
+        .querySelectorAll("[data-lang]")
+        .forEach((button) =>
+          button.addEventListener("click", () =>
+            setLanguage(button.dataset.lang),
+          ),
+        );
+      const header = document.getElementById("header");
+      function updateHeader() {
+        header.classList.toggle("scrolled", window.scrollY > 32);
+      }
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                observer.unobserve(entry.target);
+              }
+            }),
+          { threshold: 0.08 },
+        );
+        document
+          .querySelectorAll(".reveal")
+          .forEach((section) => observer.observe(section));
+        document.documentElement.classList.add("js");
+      }
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
 </html>
+

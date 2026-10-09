@@ -22,6 +22,8 @@ const conversation = [];
 let activeRequestController = null;
 let activeRequestId = 0;
 let activeReplyMessage = null;
+let followChatOutput = true;
+let lastChatScrollTop = 0;
 let pendingAttachments = [];
 
 const localReplies = [
@@ -175,13 +177,31 @@ function saveConversationHistory() {
   }
 }
 
-function scrollChatToBottom() {
+function scrollChatToBottom(force = false) {
   const scroller = chatShell || document.scrollingElement || document.documentElement;
+  if (force) followChatOutput = true;
+  if (!followChatOutput) return;
 
   requestAnimationFrame(() => {
-    scroller.scrollTop = scroller.scrollHeight;
+    if (followChatOutput) {
+      scroller.scrollTop = scroller.scrollHeight;
+      lastChatScrollTop = scroller.scrollTop;
+    }
   });
 }
+
+chatShell?.addEventListener("scroll", () => {
+  const top = chatShell.scrollTop;
+  // Content growth can trigger scroll events too; only upward movement pauses following.
+  if (top < lastChatScrollTop - 1) followChatOutput = false;
+  else if (chatShell.scrollHeight - chatShell.clientHeight - top <= 4) followChatOutput = true;
+  lastChatScrollTop = top;
+}, { passive: true });
+
+// Cancel a queued follow before an upward wheel gesture moves the viewport.
+chatShell?.addEventListener("wheel", event => {
+  if (event.deltaY < 0) followChatOutput = false;
+}, { passive: true });
 
 function appendConversation(role, content, sourcePrompt = "") {
   conversation.push({
@@ -240,6 +260,8 @@ function pruneChatAfterMessage(messageElement) {
       conversation.push({
         role: "assistant",
         content: message.dataset.reply,
+        ...(message.dataset.sources ? { sources: JSON.parse(message.dataset.sources) } : {}),
+        ...(message.dataset.responseTimeMs ? { responseTimeMs: Number(message.dataset.responseTimeMs) } : {}),
         ...(message.dataset.sourcePrompt ? { sourcePrompt: message.dataset.sourcePrompt } : {})
       });
     }
@@ -458,7 +480,7 @@ function addMessage(text, sender, extraClass = "", attachments = []) {
   }
 
   chatMessages.appendChild(message);
-  scrollChatToBottom();
+  scrollChatToBottom(sender === "user");
   updateEmptyState();
   return message;
 }
@@ -489,26 +511,22 @@ function updateBotMessage(message, text, options = {}) {
 }
 
 function renderReplySources(message, metadata) {
+  const previousSources = message.dataset.sources;
   if (metadata) {
     if (metadata.sources) message.dataset.sources = JSON.stringify(metadata.sources);
     if (metadata.status !== undefined) message.dataset.toolStatus = metadata.status;
   }
-  const previousDisclosure = message.querySelector(".chat-sources details");
-  if (previousDisclosure) message.dataset.sourcesOpen = String(previousDisclosure.open);
-  message.querySelector(".chat-sources")?.remove();
   const sources = JSON.parse(message.dataset.sources || "[]");
-  const status = message.dataset.toolStatus || "";
-  if (!sources.length && !status) return;
+  const existingSection = message.querySelector(".chat-sources");
+  if (!sources.length) { existingSection?.remove(); renderReplyStatus(message); return; }
+  // Keep the disclosure mounted during text streaming so it remains clickable.
+  if (existingSection && previousSources === message.dataset.sources) { renderReplyStatus(message); return; }
+  const previousDisclosure = existingSection?.querySelector("details");
+  if (previousDisclosure) message.dataset.sourcesOpen = String(previousDisclosure.open);
+  existingSection?.remove();
   const section = document.createElement("div");
   section.className = "chat-sources";
   section.setAttribute("aria-label", "Sources");
-  if (status) {
-    const heading = document.createElement("div");
-    heading.className = "chat-source-status";
-    heading.setAttribute("role", "status");
-    heading.textContent = `${status}…`;
-    section.appendChild(heading);
-  }
   const list = document.createElement("div");
   list.className = "chat-source-links";
   for (const source of sources) {
@@ -528,14 +546,56 @@ function renderReplySources(message, metadata) {
     const details = document.createElement("details");
     details.open = message.dataset.sourcesOpen === "true";
     const summary = document.createElement("summary");
-    summary.textContent = `${list.childElementCount} ${list.childElementCount === 1 ? "source" : "sources"}`;
+    summary.className = "chat-response-status";
+    summary.title = "Sources";
     details.append(summary, list);
     details.addEventListener("toggle", () => {
       if (details.isConnected) message.dataset.sourcesOpen = String(details.open);
     });
     section.appendChild(details);
   }
-  message.querySelector(".chat-bubble")?.appendChild(section);
+  if (list.childElementCount) {
+    const bubble = message.querySelector(".chat-bubble");
+    if (bubble) message.insertBefore(section, bubble);
+    scrollChatToBottom();
+  }
+  renderReplyStatus(message);
+}
+
+function renderReplyStatus(message) {
+  const startedAt = Number(message.dataset.requestStartedAt);
+  const duration = Number(message.dataset.responseTimeMs);
+  const state = message.dataset.responseState;
+  let text = message.dataset.toolStatus || "";
+  if (state === "working") {
+    const elapsed = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+    text = text || (message.dataset.reply ? "Writing" : "Thinking");
+    text += ` · ${elapsed}s`;
+  } else if (state === "complete") {
+    // This measures the entire request, not the model's private reasoning time.
+    text = `Responded in ${(duration / 1000).toFixed(1)}s`;
+  } else if (state === "stopped") text = "Stopped";
+  else if (state === "failed") text = "Request failed";
+  const disclosure = message.querySelector(".chat-sources details");
+  if (disclosure) {
+    message.querySelector(":scope > .chat-response-status")?.remove();
+    const summary = disclosure.querySelector("summary");
+    const count = disclosure.querySelectorAll(".chat-source-links a").length;
+    const sourceLabel = `${count} ${count === 1 ? "source" : "sources"}`;
+    summary.textContent = text ? `${text} · ${sourceLabel}` : sourceLabel;
+    summary.setAttribute("aria-label", summary.textContent);
+    return;
+  }
+  let status = message.querySelector(":scope > .chat-response-status");
+  if (!text) { status?.remove(); return; }
+  if (!status) {
+    status = document.createElement("div");
+    status.className = "chat-response-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "off");
+    message.prepend(status);
+  }
+  status.textContent = text;
 }
 
 function addReplyActions(message) {
@@ -944,6 +1004,11 @@ function stopActiveResponse() {
   activeRequestId += 1;
 
   activeReplyMessage?.classList.remove("streaming");
+  if (activeReplyMessage) {
+    activeReplyMessage.dataset.responseState = "stopped";
+    activeReplyMessage.dataset.toolStatus = "";
+    renderReplyStatus(activeReplyMessage);
+  }
   activeReplyMessage = null;
 
   chatInput.disabled = false;
@@ -972,10 +1037,20 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
     delete messageElement.dataset.toolStatus;
     updateBotMessage(messageElement, "");
   }
+  const startedAt = Date.now();
+  messageElement.dataset.requestStartedAt = String(startedAt);
+  messageElement.dataset.responseState = "working";
+  messageElement.dataset.toolStatus = attachments.length ? "Reading files" : "Thinking";
+  delete messageElement.dataset.responseTimeMs;
+  renderReplyStatus(messageElement);
+  const statusTimer = setInterval(() => {
+    if (requestId === activeRequestId) renderReplyStatus(messageElement);
+  }, 1000);
 
   try {
     const { reply } = await getBotReply(prompt, (partialReply) => {
       if (requestId === activeRequestId) {
+        messageElement.dataset.toolStatus = "Writing";
         updateBotMessage(messageElement, partialReply, { sourcePrompt: prompt });
       }
     }, attachments, (metadata) => {
@@ -988,6 +1063,9 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
 
     if (!reply) throw new Error("The AI returned no answer.");
     const finalReply = reply;
+    messageElement.dataset.responseState = "complete";
+    messageElement.dataset.responseTimeMs = String(Date.now() - startedAt);
+    messageElement.dataset.toolStatus = "";
 
     updateBotMessage(messageElement, finalReply, {
       sourcePrompt: prompt,
@@ -999,11 +1077,17 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
     const savedReply = [...conversation].reverse().find(item => item.role === "assistant" && item.sourcePrompt === prompt);
     if (savedReply?.role === "assistant") {
       savedReply.sources = JSON.parse(messageElement.dataset.sources || "[]");
+      savedReply.responseTimeMs = Number(messageElement.dataset.responseTimeMs);
       saveConversationHistory();
     }
   } catch (error) {
+    if (requestId !== activeRequestId) {
+      if (error.name === "AbortError" && !messageElement.dataset.reply?.trim()) messageElement.remove();
+      return;
+    }
     if (error.name === "AbortError") {
-      const hasReplyText = Boolean((messageElement.dataset.reply || messageElement.textContent || "").trim());
+      messageElement.dataset.responseState = "stopped";
+      const hasReplyText = Boolean(messageElement.dataset.reply?.trim());
 
       if (!hasReplyText) {
         messageElement.remove();
@@ -1014,6 +1098,7 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
     }
 
     const localReply = `Sorry, ${String(error.message || "the AI request failed. Please try again.").slice(0, 240)}`;
+    messageElement.dataset.responseState = "failed";
     messageElement.dataset.toolStatus = "";
     updateBotMessage(messageElement, localReply, {
       sourcePrompt: prompt,
@@ -1023,6 +1108,7 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
       ? replaceConversationReply(prompt, localReply)
       : appendConversation("assistant", localReply, prompt);
   } finally {
+    clearInterval(statusTimer);
     if (requestId === activeRequestId) {
       activeRequestController = null;
       activeReplyMessage = null;
@@ -1035,7 +1121,7 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
         chatAttach.disabled = false;
       }
       setSubmitButtonMode("send");
-      chatInput.focus();
+      if (followChatOutput) chatInput.focus({ preventScroll: true });
     }
   }
 }
@@ -1065,6 +1151,10 @@ function loadConversationHistory() {
 
       if (role === "assistant") {
         message.dataset.sources = JSON.stringify(Array.isArray(item.sources) ? item.sources : []);
+        if (Number.isFinite(item.responseTimeMs) && item.responseTimeMs >= 0) {
+          message.dataset.responseState = "complete";
+          message.dataset.responseTimeMs = String(item.responseTimeMs);
+        }
         updateBotMessage(message, String(item.content), {
           sourcePrompt: item.sourcePrompt || "",
           actions: Boolean(item.sourcePrompt)
@@ -1075,6 +1165,7 @@ function loadConversationHistory() {
         role,
         content: String(item.content),
         ...(Array.isArray(item.sources) ? { sources: item.sources } : {}),
+        ...(Number.isFinite(item.responseTimeMs) && item.responseTimeMs >= 0 ? { responseTimeMs: item.responseTimeMs } : {}),
         ...(item.sourcePrompt ? { sourcePrompt: String(item.sourcePrompt) } : {})
       });
     });
@@ -1172,6 +1263,8 @@ chatClear?.addEventListener("click", () => {
   activeRequestController = null;
   activeReplyMessage = null;
   activeRequestId += 1;
+  followChatOutput = true;
+  lastChatScrollTop = 0;
   conversation.length = 0;
   localStorage.removeItem(CHAT_HISTORY_KEY);
   chatMessages.replaceChildren();

@@ -447,11 +447,42 @@ body::after {
   font-weight: 700;
 }
 
-.chat-sources { margin-top: 16px; font-size: 13px; color: #666a70; }
-.chat-source-status { margin-bottom: 6px; }
+.chat-sources { width: 100%; margin-bottom: 10px; font-size: 13px; color: #666a70; }
+.chat-response-status {
+  width: 100%;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #777b82;
+  overflow-wrap: anywhere;
+}
 .chat-source-links { display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .chat-source-links a { color: inherit; max-width: 100%; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
 .chat-sources summary { cursor: pointer; width: fit-content; padding: 3px 0; }
+.chat-sources summary.chat-response-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+.chat-sources summary::marker { content: ""; }
+.chat-sources summary::-webkit-details-marker { display: none; }
+.chat-sources summary::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  background: currentColor;
+  -webkit-mask: url("../icons/chevron-right.svg") center / contain no-repeat;
+  mask: url("../icons/chevron-right.svg") center / contain no-repeat;
+  transition: transform 0.15s ease;
+}
+.chat-sources details[open] summary::after { transform: rotate(90deg); }
+.chat-sources summary:focus-visible { outline: 2px solid #777b82; outline-offset: 3px; }
 .chat-sources details[open] .chat-source-links { margin-top: 8px; }
 
 .chat-rendered code {

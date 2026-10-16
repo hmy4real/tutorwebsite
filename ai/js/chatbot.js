@@ -7,11 +7,13 @@ const chatClear = document.getElementById("chatClear");
 const chatEmptyState = document.getElementById("chatEmptyState");
 const chatShell = document.querySelector(".chat-shell");
 const chatAttach = document.getElementById("chatAttach");
+const chatThink = document.getElementById("chatThink");
 const chatUpload = document.getElementById("chatUpload");
 const attachmentTray = document.getElementById("attachmentTray");
 const submitButton = document.getElementById("chatSubmit") || chatForm.querySelector("button[type='submit']");
 
 const CHAT_HISTORY_KEY = "stevegptChatHistory";
+const THINKING_MODE_KEY = "stevegptThinkingEnabled";
 const REQUEST_TIMEOUT_MS = 190 * 1000;
 const MAX_ATTACHMENTS = 4;
 const MAX_FILE_BYTES = 16 * 1024 * 1024;
@@ -25,6 +27,7 @@ let activeReplyMessage = null;
 let followChatOutput = true;
 let lastChatScrollTop = 0;
 let pendingAttachments = [];
+let thinkingEnabled = false;
 
 const localReplies = [
   {
@@ -47,6 +50,21 @@ const localReplies = [
 
 initWallpaperGlows();
 setSubmitButtonMode("send");
+try { thinkingEnabled = localStorage.getItem(THINKING_MODE_KEY) === "true"; } catch {}
+updateThinkingButton();
+
+function updateThinkingButton() {
+  chatThink?.setAttribute("aria-pressed", String(thinkingEnabled));
+  if (chatThink) chatThink.title = `Thinking mode (${thinkingEnabled ? "on" : "off"})`;
+}
+
+chatThink?.addEventListener("click", () => {
+  if (activeRequestController) return;
+  thinkingEnabled = !thinkingEnabled;
+  updateThinkingButton();
+  try { localStorage.setItem(THINKING_MODE_KEY, String(thinkingEnabled)); } catch {}
+  chatInput.focus({ preventScroll: true });
+});
 
 function initWallpaperGlows() {
   const ambient = document.querySelector(".ambient");
@@ -145,6 +163,7 @@ function regenerateIconSvg() {
 
 function setSubmitButtonMode(mode) {
   const isStop = mode === "stop";
+  if (chatThink) chatThink.disabled = isStop;
 
   submitButton.dataset.mode = mode;
   submitButton.innerHTML = isStop ? stopIconSvg() : sendIconSvg();
@@ -914,7 +933,8 @@ async function getBotReply(message, onChunk = () => {}, attachments = [], onMeta
       body: JSON.stringify({
         message,
         messages: conversation,
-        attachments: serializeAttachments(attachments)
+        attachments: serializeAttachments(attachments),
+        thinking: thinkingEnabled
       }),
       signal: activeRequestController?.signal
     });
@@ -1040,7 +1060,7 @@ async function runReply(prompt, messageElement, replaceExisting = false, attachm
   const startedAt = Date.now();
   messageElement.dataset.requestStartedAt = String(startedAt);
   messageElement.dataset.responseState = "working";
-  messageElement.dataset.toolStatus = attachments.length ? "Reading files" : "Thinking";
+  messageElement.dataset.toolStatus = attachments.length ? "Reading files" : thinkingEnabled ? "Thinking" : "Preparing reply";
   delete messageElement.dataset.responseTimeMs;
   renderReplyStatus(messageElement);
   const statusTimer = setInterval(() => {
@@ -1195,6 +1215,7 @@ function resizeComposer() {
   const bottomSpace = chatForm.offsetHeight + 24;
   chatMessages.style.paddingBottom = bottomSpace + "px";
   chatShell.style.scrollPaddingBottom = bottomSpace + "px";
+  scrollChatToBottom();
 }
 
 chatInput.addEventListener("keydown", (event) => {

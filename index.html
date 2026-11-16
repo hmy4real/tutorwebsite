@@ -177,13 +177,14 @@
           0 8px 32px #aeb6ff12;
       }
       .tools {
+        margin-top: calc(-1 * min(22svh, 210px));
         padding: 28px 24px 0;
         text-align: center;
       }
       .tools h2 {
         margin: 0 0 16px;
         color: var(--muted);
-        font-size: 16px;
+        font-size: 19px;
         font-weight: 500;
       }
       .tool-links {
@@ -232,6 +233,11 @@
         }
         .footer p {
           font-size: 15px;
+        }
+      }
+      @media (max-height: 560px) {
+        .tools {
+          margin-top: -40px;
         }
       }
       @keyframes content-in {

@@ -181,7 +181,8 @@
         padding: 28px 24px 0;
         text-align: center;
       }
-      .tools h2 {
+      .tools h2,
+      .focus h2 {
         margin: 0 0 16px;
         color: var(--muted);
         font-size: 23px;
@@ -198,6 +199,16 @@
         background: #ffffff07;
         border-color: #ffffff23;
         font-size: 14px;
+      }
+      .focus {
+        padding: 64px 24px 0;
+        text-align: center;
+      }
+      .focus p {
+        margin: 0 auto 20px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
       }
       .footer {
         position: relative;
@@ -295,6 +306,13 @@
           <a class="glass-link tool-link" href="/clock">Live Time</a>
         </div>
       </section>
+      <section class="focus" aria-labelledby="focus-title">
+        <h2 id="focus-title">Focus</h2>
+        <p>The minimalistic lockdown app to help you stay focused</p>
+        <a class="glass-link tool-link" href="/downloads/Focus.exe" download
+          >Download</a
+        >
+      </section>
     </main>
     <footer class="footer">
       <p>Your future self will thank you.</p>
@@ -305,4 +323,3 @@
     </script>
   </body>
 </html>
-
